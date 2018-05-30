@@ -7,20 +7,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Column;
 import javax.persistence.Version;
-import org.agf.model.Task;
 import java.util.Set;
 import java.util.HashSet;
-import javax.persistence.ManyToMany;
+import org.agf.model.Task;
+import javax.persistence.OneToMany;
 import javax.persistence.CascadeType;
-import java.util.Date;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import org.agf.model.User;
-import javax.persistence.ManyToOne;
-import javax.persistence.FetchType;
+import org.agf.model.Goal;
 
 @Entity
-public class Goal implements Serializable {
+public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	@Id
@@ -31,20 +26,20 @@ public class Goal implements Serializable {
 	@Column(name = "version")
 	private int version;
 
-	@ManyToMany(mappedBy = "goals", cascade = {CascadeType.PERSIST,
-			CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
-	private Set<Task> tasks = new HashSet<Task>();
-
 	@Column(nullable = false)
 	private String name;
 
-	@Column
-	@Temporal(TemporalType.DATE)
-	private Date deadline;
+	@Column(nullable = false)
+	private String email;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST,
-			CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
-	private User owner;
+	@OneToMany(mappedBy = "creator", cascade = CascadeType.ALL)
+	private Set<Task> createdTasks = new HashSet<Task>();
+
+	@OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+	private Set<Task> ownedTasks = new HashSet<Task>();
+
+	@OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+	private Set<Goal> ownedGoals = new HashSet<Goal>();
 
 	public Long getId() {
 		return this.id;
@@ -67,10 +62,10 @@ public class Goal implements Serializable {
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof Goal)) {
+		if (!(obj instanceof User)) {
 			return false;
 		}
-		Goal other = (Goal) obj;
+		User other = (User) obj;
 		if (id != null) {
 			if (!id.equals(other.id)) {
 				return false;
@@ -87,14 +82,6 @@ public class Goal implements Serializable {
 		return result;
 	}
 
-	public Set<Task> getTasks() {
-		return this.tasks;
-	}
-
-	public void setTasks(final Set<Task> tasks) {
-		this.tasks = tasks;
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -103,12 +90,12 @@ public class Goal implements Serializable {
 		this.name = name;
 	}
 
-	public Date getDeadline() {
-		return deadline;
+	public String getEmail() {
+		return email;
 	}
 
-	public void setDeadline(Date deadline) {
-		this.deadline = deadline;
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	@Override
@@ -116,14 +103,33 @@ public class Goal implements Serializable {
 		String result = getClass().getSimpleName() + " ";
 		if (name != null && !name.trim().isEmpty())
 			result += "name: " + name;
+		if (email != null && !email.trim().isEmpty())
+			result += ", email: " + email;
 		return result;
 	}
 
-	public User getOwner() {
-		return this.owner;
+	public Set<Task> getCreatedTasks() {
+		return this.createdTasks;
 	}
 
-	public void setOwner(final User owner) {
-		this.owner = owner;
+	public void setCreatedTasks(final Set<Task> createdTasks) {
+		this.createdTasks = createdTasks;
 	}
+
+	public Set<Task> getOwnedTasks() {
+		return this.ownedTasks;
+	}
+
+	public void setOwnedTasks(final Set<Task> ownedTasks) {
+		this.ownedTasks = ownedTasks;
+	}
+
+	public Set<Goal> getOwnedGoals() {
+		return this.ownedGoals;
+	}
+
+	public void setOwnedGoals(final Set<Goal> ownedGoals) {
+		this.ownedGoals = ownedGoals;
+	}
+
 }

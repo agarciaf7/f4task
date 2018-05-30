@@ -12,6 +12,10 @@ import java.util.Set;
 import java.util.HashSet;
 import org.agf.model.Goal;
 import javax.persistence.ManyToMany;
+import org.agf.model.User;
+import javax.persistence.ManyToOne;
+import javax.persistence.FetchType;
+import javax.persistence.CascadeType;
 
 @Entity
 public class Task implements Serializable {
@@ -48,6 +52,14 @@ public class Task implements Serializable {
 
 	@ManyToMany
 	private Set<Goal> goals = new HashSet<Goal>();
+
+	@ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST,
+			CascadeType.REFRESH, CascadeType.DETACH})
+	private User creator;
+
+	@ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST,
+			CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
+	private User owner;
 
 	public Long getId() {
 		return this.id;
@@ -167,4 +179,21 @@ public class Task implements Serializable {
 	public void setGoals(final Set<Goal> goals) {
 		this.goals = goals;
 	}
+
+	public User getCreator() {
+		return this.creator;
+	}
+
+	public void setCreator(final User creator) {
+		this.creator = creator;
+	}
+
+	public User getOwner() {
+		return this.owner;
+	}
+
+	public void setOwner(final User owner) {
+		this.owner = owner;
+	}
+
 }
