@@ -54,10 +54,6 @@ public class Task implements Serializable {
 	private Set<Goal> goals = new HashSet<Goal>();
 
 	@ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST,
-			CascadeType.REFRESH, CascadeType.DETACH})
-	private User creator;
-
-	@ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
 	private User owner;
 
@@ -178,14 +174,6 @@ public class Task implements Serializable {
 
 	public void setGoals(final Set<Goal> goals) {
 		this.goals = goals;
-	}
-
-	public User getCreator() {
-		return this.creator;
-	}
-
-	public void setCreator(final User creator) {
-		this.creator = creator;
 	}
 
 	public User getOwner() {

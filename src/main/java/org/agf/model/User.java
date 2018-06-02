@@ -32,9 +32,6 @@ public class User implements Serializable {
 	@Column(nullable = false)
 	private String email;
 
-	@OneToMany(mappedBy = "creator", cascade = CascadeType.ALL)
-	private Set<Task> createdTasks = new HashSet<Task>();
-
 	@OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
 	private Set<Task> ownedTasks = new HashSet<Task>();
 
@@ -106,14 +103,6 @@ public class User implements Serializable {
 		if (email != null && !email.trim().isEmpty())
 			result += ", email: " + email;
 		return result;
-	}
-
-	public Set<Task> getCreatedTasks() {
-		return this.createdTasks;
-	}
-
-	public void setCreatedTasks(final Set<Task> createdTasks) {
-		this.createdTasks = createdTasks;
 	}
 
 	public Set<Task> getOwnedTasks() {
