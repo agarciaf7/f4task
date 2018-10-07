@@ -5,6 +5,7 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:forgeview="http://jboss.org/forge/view"
 	template="/resources/scaffold/pageTemplate.xhtml">
 
 	<f:metadata>
@@ -68,6 +69,41 @@
 				<h:panelGroup>
 					<h:inputText id="taskBeanTaskObservaciones" value="#{taskBean.task.observaciones}"/>
 					<h:message for="taskBeanTaskObservaciones" styleClass="error"/>
+				</h:panelGroup>
+				<h:outputText/>
+				<h:outputLabel for="taskBeanTaskGoals" value="Goals:"/>
+				<h:panelGroup>
+					<ui:param name="_collection" value="#{taskBean.task.goals}"/>
+					<h:dataTable id="taskBeanTaskGoals" styleClass="data-table" value="#{forgeview:asList(_collection)}" var="_item">
+						<h:column>
+							<f:facet name="header">
+								<h:outputText value="Name"/>
+							</f:facet>
+							<h:link outcome="/goal/view">
+								<f:param name="id" value="#{_item.id}"/>
+								<h:outputText id="_itemName" value="#{_item.name}"/>
+							</h:link>
+						</h:column>
+						<h:column footerClass="remove-column" headerClass="remove-column">
+							<h:commandLink action="#{_collection.remove(_item)}" styleClass="remove-button"/>
+						</h:column>
+					</h:dataTable>
+					<h:panelGrid columnClasses=",remove-column" columns="2" styleClass="data-table-footer">
+						<h:selectOneMenu converter="#{goalBean.converter}" id="taskBeanTaskGoalsSelect" value="#{requestScope['taskBeanTaskGoalsSelect']}">
+							<f:selectItem/>
+							<f:selectItems itemLabel="#{forgeview:display(_item)}" itemValue="#{_item}" value="#{goalBean.all}" var="_item"/>
+						</h:selectOneMenu>
+						<h:commandLink action="#{_collection.add(requestScope['taskBeanTaskGoalsSelect'])}" id="taskBeanTaskGoalsAdd" onclick="if (document.getElementById(document.forms[0].id+':taskBeanTaskGoalsSelect').selectedIndex &lt; 1) { alert('Must select a Goal'); return false; }" styleClass="add-button"/>
+					</h:panelGrid>
+				</h:panelGroup>
+				<h:outputText/>
+				<h:outputLabel for="taskBeanTaskOwner" value="Owner:"/>
+				<h:panelGroup>
+					<h:selectOneMenu converter="#{userBean.converter}" id="taskBeanTaskOwner" value="#{taskBean.task.owner}">
+						<f:selectItem/>
+						<f:selectItems itemLabel="#{forgeview:display(_item)}" itemValue="#{_item}" value="#{userBean.all}" var="_item"/>
+					</h:selectOneMenu>
+					<h:message for="taskBeanTaskOwner" styleClass="error"/>
 				</h:panelGroup>
 				<h:outputText/>
 				<h:outputLabel for="taskBeanTaskDue" value="Due:"/>

@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:forgeview="http://jboss.org/forge/view"
+	template="/resources/scaffold/pageTemplate.xhtml">
+
+	<f:metadata>
+		<f:viewParam name="id" value='#{goalBean.id}'/>
+		<f:event type="preRenderView" listener='#{goalBean.retrieve}'/>
+	</f:metadata>
+
+	<ui:param name="pageTitle" value="View Goal"/>
+
+	<ui:define name="header">
+		Goal
+	</ui:define>
+
+	<ui:define name="subheader">
+		View existing Goal
+	</ui:define>
+
+	<ui:define name="footer"/>
+
+	<ui:define name="main">
+		<h:panelGrid columnClasses="label,component,required" columns="3">
+			<h:outputLabel for="goalBeanGoalTasks" value="Tasks:"/>
+			<h:dataTable id="goalBeanGoalTasks" styleClass="data-table" value="#{forgeview:asList(goalBean.goal.tasks)}" var="_item">
+				<h:column>
+					<f:facet name="header">
+						<h:outputText value="Name"/>
+					</f:facet>
+					<h:link outcome="/task/view">
+						<f:param name="id" value="#{_item.id}"/>
+						<h:outputText id="_itemName" value="#{_item.name}"/>
+					</h:link>
+				</h:column>
+				<h:column>
+					<f:facet name="header">
+						<h:outputText value="Creation"/>
+					</f:facet>
+					<h:link outcome="/task/view">
+						<f:param name="id" value="#{_item.id}"/>
+						<h:outputText id="_itemCreation" value="#{_item.creation}">
+							<f:convertDateTime/>
+						</h:outputText>
+					</h:link>
+				</h:column>
+			</h:dataTable>
+			<h:outputText/>
+			<h:outputLabel for="goalBeanGoalName" value="Name:"/>
+			<h:outputText id="goalBeanGoalName" value="#{goalBean.goal.name}"/>
+			<h:outputText/>
+			<h:outputLabel for="goalBeanGoalDeadline" value="Deadline:"/>
+			<h:outputText id="goalBeanGoalDeadline" value="#{goalBean.goal.deadline}">
+				<f:convertDateTime type="date"/>
+			</h:outputText>
+			<h:outputText/>
+			<h:outputLabel for="goalBeanGoalOwner" value="Owner:"/>
+			<h:link id="goalBeanGoalOwner" outcome="/user/view" rendered="#{!empty goalBean.goal.owner}" value="#{goalBean.goal.owner}">
+				<f:param name="id" value="#{goalBean.goal.owner.id}"/>
+			</h:link>
+			<h:outputText/>
+		</h:panelGrid>
+
+		<div class="buttons">
+			<h:link value="View All" outcome="search" styleClass="btn btn-primary"/> 
+			<h:link value="Edit" outcome="create" includeViewParams="true" styleClass="btn btn-primary"/>
+			<h:link value="Create New" outcome="create" styleClass="btn btn-primary"/>
+		</div>
+	</ui:define>
+
+</ui:composition>

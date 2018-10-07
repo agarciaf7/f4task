@@ -4,6 +4,7 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:forgeview="http://jboss.org/forge/view"
 	template="/resources/scaffold/pageTemplate.xhtml">
 
 	<f:metadata>
@@ -43,6 +44,24 @@
 			<h:outputText/>
 			<h:outputLabel for="taskBeanTaskObservaciones" value="Observaciones:"/>
 			<h:outputText id="taskBeanTaskObservaciones" value="#{taskBean.task.observaciones}"/>
+			<h:outputText/>
+			<h:outputLabel for="taskBeanTaskGoals" value="Goals:"/>
+			<h:dataTable id="taskBeanTaskGoals" styleClass="data-table" value="#{forgeview:asList(taskBean.task.goals)}" var="_item">
+				<h:column>
+					<f:facet name="header">
+						<h:outputText value="Name"/>
+					</f:facet>
+					<h:link outcome="/goal/view">
+						<f:param name="id" value="#{_item.id}"/>
+						<h:outputText id="_itemName" value="#{_item.name}"/>
+					</h:link>
+				</h:column>
+			</h:dataTable>
+			<h:outputText/>
+			<h:outputLabel for="taskBeanTaskOwner" value="Owner:"/>
+			<h:link id="taskBeanTaskOwner" outcome="/user/view" rendered="#{!empty taskBean.task.owner}" value="#{taskBean.task.owner}">
+				<f:param name="id" value="#{taskBean.task.owner.id}"/>
+			</h:link>
 			<h:outputText/>
 			<h:outputLabel value="Due:"/>
 			<h:outputText styleClass="#{taskBean.task.due ? 'boolean-true' : 'boolean-false'}" value=""/>

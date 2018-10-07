@@ -24,15 +24,15 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.agf.model.Task;
-import java.util.Iterator;
 import org.agf.model.Goal;
+import java.util.Iterator;
+import org.agf.model.Task;
 import org.agf.model.User;
 
 /**
- * Backing bean for Task entities.
+ * Backing bean for Goal entities.
  * <p/>
- * This class provides CRUD functionality for all Task entities. It focuses
+ * This class provides CRUD functionality for all Goal entities. It focuses
  * purely on Java EE 6 standards (e.g. <tt>&#64;ConversationScoped</tt> for
  * state management, <tt>PersistenceContext</tt> for persistence,
  * <tt>CriteriaBuilder</tt> for searches) rather than introducing a CRUD
@@ -42,12 +42,12 @@ import org.agf.model.User;
 @Named
 @Stateful
 @ConversationScoped
-public class TaskBean implements Serializable {
+public class GoalBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	/*
-	 * Support creating and retrieving Task entities
+	 * Support creating and retrieving Goal entities
 	 */
 
 	private Long id;
@@ -60,14 +60,14 @@ public class TaskBean implements Serializable {
 		this.id = id;
 	}
 
-	private Task task;
+	private Goal goal;
 
-	public Task getTask() {
-		return this.task;
+	public Goal getGoal() {
+		return this.goal;
 	}
 
-	public void setTask(Task task) {
-		this.task = task;
+	public void setGoal(Goal goal) {
+		this.goal = goal;
 	}
 
 	@Inject
@@ -95,19 +95,19 @@ public class TaskBean implements Serializable {
 		}
 
 		if (this.id == null) {
-			this.task = this.example;
+			this.goal = this.example;
 		} else {
-			this.task = findById(getId());
+			this.goal = findById(getId());
 		}
 	}
 
-	public Task findById(Long id) {
+	public Goal findById(Long id) {
 
-		return this.entityManager.find(Task.class, id);
+		return this.entityManager.find(Goal.class, id);
 	}
 
 	/*
-	 * Support updating and deleting Task entities
+	 * Support updating and deleting Goal entities
 	 */
 
 	public String update() {
@@ -115,11 +115,11 @@ public class TaskBean implements Serializable {
 
 		try {
 			if (this.id == null) {
-				this.entityManager.persist(this.task);
+				this.entityManager.persist(this.goal);
 				return "search?faces-redirect=true";
 			} else {
-				this.entityManager.merge(this.task);
-				return "view?faces-redirect=true&id=" + this.task.getId();
+				this.entityManager.merge(this.goal);
+				return "view?faces-redirect=true&id=" + this.goal.getId();
 			}
 		} catch (Exception e) {
 			FacesContext.getCurrentInstance().addMessage(null,
@@ -132,16 +132,16 @@ public class TaskBean implements Serializable {
 		this.conversation.end();
 
 		try {
-			Task deletableEntity = findById(getId());
-			Iterator<Goal> iterGoals = deletableEntity.getGoals().iterator();
-			for (; iterGoals.hasNext();) {
-				Goal nextInGoals = iterGoals.next();
-				nextInGoals.getTasks().remove(deletableEntity);
-				iterGoals.remove();
-				this.entityManager.merge(nextInGoals);
+			Goal deletableEntity = findById(getId());
+			Iterator<Task> iterTasks = deletableEntity.getTasks().iterator();
+			for (; iterTasks.hasNext();) {
+				Task nextInTasks = iterTasks.next();
+				nextInTasks.getGoals().remove(deletableEntity);
+				iterTasks.remove();
+				this.entityManager.merge(nextInTasks);
 			}
 			User owner = deletableEntity.getOwner();
-			owner.getOwnedTasks().remove(deletableEntity);
+			owner.getOwnedGoals().remove(deletableEntity);
 			deletableEntity.setOwner(null);
 			this.entityManager.merge(owner);
 			this.entityManager.remove(deletableEntity);
@@ -155,14 +155,14 @@ public class TaskBean implements Serializable {
 	}
 
 	/*
-	 * Support searching Task entities with pagination
+	 * Support searching Goal entities with pagination
 	 */
 
 	private int page;
 	private long count;
-	private List<Task> pageItems;
+	private List<Goal> pageItems;
 
-	private Task example = new Task();
+	private Goal example = new Goal();
 
 	public int getPage() {
 		return this.page;
@@ -176,11 +176,11 @@ public class TaskBean implements Serializable {
 		return 10;
 	}
 
-	public Task getExample() {
+	public Goal getExample() {
 		return this.example;
 	}
 
-	public void setExample(Task example) {
+	public void setExample(Goal example) {
 		this.example = example;
 	}
 
@@ -196,7 +196,7 @@ public class TaskBean implements Serializable {
 		// Populate this.count
 
 		CriteriaQuery<Long> countCriteria = builder.createQuery(Long.class);
-		Root<Task> root = countCriteria.from(Task.class);
+		Root<Goal> root = countCriteria.from(Goal.class);
 		countCriteria = countCriteria.select(builder.count(root)).where(
 				getSearchPredicates(root));
 		this.count = this.entityManager.createQuery(countCriteria)
@@ -204,16 +204,16 @@ public class TaskBean implements Serializable {
 
 		// Populate this.pageItems
 
-		CriteriaQuery<Task> criteria = builder.createQuery(Task.class);
-		root = criteria.from(Task.class);
-		TypedQuery<Task> query = this.entityManager.createQuery(criteria
+		CriteriaQuery<Goal> criteria = builder.createQuery(Goal.class);
+		root = criteria.from(Goal.class);
+		TypedQuery<Goal> query = this.entityManager.createQuery(criteria
 				.select(root).where(getSearchPredicates(root)));
 		query.setFirstResult(this.page * getPageSize()).setMaxResults(
 				getPageSize());
 		this.pageItems = query.getResultList();
 	}
 
-	private Predicate[] getSearchPredicates(Root<Task> root) {
+	private Predicate[] getSearchPredicates(Root<Goal> root) {
 
 		CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
 		List<Predicate> predicatesList = new ArrayList<Predicate>();
@@ -224,16 +224,6 @@ public class TaskBean implements Serializable {
 					builder.lower(root.<String> get("name")),
 					'%' + name.toLowerCase() + '%'));
 		}
-		Long priority = this.example.getPriority();
-		if (priority != null && priority.intValue() != 0) {
-			predicatesList.add(builder.equal(root.get("priority"), priority));
-		}
-		String observaciones = this.example.getObservaciones();
-		if (observaciones != null && !"".equals(observaciones)) {
-			predicatesList.add(builder.like(
-					builder.lower(root.<String> get("observaciones")),
-					'%' + observaciones.toLowerCase() + '%'));
-		}
 		User owner = this.example.getOwner();
 		if (owner != null) {
 			predicatesList.add(builder.equal(root.get("owner"), owner));
@@ -242,7 +232,7 @@ public class TaskBean implements Serializable {
 		return predicatesList.toArray(new Predicate[predicatesList.size()]);
 	}
 
-	public List<Task> getPageItems() {
+	public List<Goal> getPageItems() {
 		return this.pageItems;
 	}
 
@@ -251,16 +241,16 @@ public class TaskBean implements Serializable {
 	}
 
 	/*
-	 * Support listing and POSTing back Task entities (e.g. from inside an
+	 * Support listing and POSTing back Goal entities (e.g. from inside an
 	 * HtmlSelectOneMenu)
 	 */
 
-	public List<Task> getAll() {
+	public List<Goal> getAll() {
 
-		CriteriaQuery<Task> criteria = this.entityManager.getCriteriaBuilder()
-				.createQuery(Task.class);
+		CriteriaQuery<Goal> criteria = this.entityManager.getCriteriaBuilder()
+				.createQuery(Goal.class);
 		return this.entityManager.createQuery(
-				criteria.select(criteria.from(Task.class))).getResultList();
+				criteria.select(criteria.from(Goal.class))).getResultList();
 	}
 
 	@Resource
@@ -268,8 +258,8 @@ public class TaskBean implements Serializable {
 
 	public Converter getConverter() {
 
-		final TaskBean ejbProxy = this.sessionContext
-				.getBusinessObject(TaskBean.class);
+		final GoalBean ejbProxy = this.sessionContext
+				.getBusinessObject(GoalBean.class);
 
 		return new Converter() {
 
@@ -288,7 +278,7 @@ public class TaskBean implements Serializable {
 					return "";
 				}
 
-				return String.valueOf(((Task) value).getId());
+				return String.valueOf(((Goal) value).getId());
 			}
 		};
 	}
@@ -297,15 +287,15 @@ public class TaskBean implements Serializable {
 	 * Support adding children to bidirectional, one-to-many tables
 	 */
 
-	private Task add = new Task();
+	private Goal add = new Goal();
 
-	public Task getAdd() {
+	public Goal getAdd() {
 		return this.add;
 	}
 
-	public Task getAdded() {
-		Task added = this.add;
-		this.add = new Task();
+	public Goal getAdded() {
+		Goal added = this.add;
+		this.add = new Goal();
 		return added;
 	}
 }

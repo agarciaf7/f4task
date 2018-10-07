@@ -4,6 +4,7 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:forgeview="http://jboss.org/forge/view"
 	template="/resources/scaffold/pageTemplate.xhtml">
 
 	<f:metadata>
@@ -45,6 +46,15 @@
 						<h:panelGroup>
 							<h:inputText id="taskBeanExampleObservaciones" value="#{taskBean.example.observaciones}"/>
 							<h:message for="taskBeanExampleObservaciones" styleClass="error"/>
+						</h:panelGroup>
+						<h:outputText/>
+						<h:outputLabel for="taskBeanExampleOwner" value="Owner:"/>
+						<h:panelGroup>
+							<h:selectOneMenu converter="#{userBean.converter}" id="taskBeanExampleOwner" value="#{taskBean.example.owner}">
+								<f:selectItem/>
+								<f:selectItems itemLabel="#{forgeview:display(_item)}" itemValue="#{_item}" value="#{userBean.all}" var="_item"/>
+							</h:selectOneMenu>
+							<h:message for="taskBeanExampleOwner" styleClass="error"/>
 						</h:panelGroup>
 						<h:outputText/>
 					</h:panelGrid>

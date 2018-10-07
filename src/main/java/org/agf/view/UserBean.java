@@ -24,15 +24,15 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.agf.model.Task;
+import org.agf.model.User;
 import java.util.Iterator;
 import org.agf.model.Goal;
-import org.agf.model.User;
+import org.agf.model.Task;
 
 /**
- * Backing bean for Task entities.
+ * Backing bean for User entities.
  * <p/>
- * This class provides CRUD functionality for all Task entities. It focuses
+ * This class provides CRUD functionality for all User entities. It focuses
  * purely on Java EE 6 standards (e.g. <tt>&#64;ConversationScoped</tt> for
  * state management, <tt>PersistenceContext</tt> for persistence,
  * <tt>CriteriaBuilder</tt> for searches) rather than introducing a CRUD
@@ -42,12 +42,12 @@ import org.agf.model.User;
 @Named
 @Stateful
 @ConversationScoped
-public class TaskBean implements Serializable {
+public class UserBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	/*
-	 * Support creating and retrieving Task entities
+	 * Support creating and retrieving User entities
 	 */
 
 	private Long id;
@@ -60,14 +60,14 @@ public class TaskBean implements Serializable {
 		this.id = id;
 	}
 
-	private Task task;
+	private User user;
 
-	public Task getTask() {
-		return this.task;
+	public User getUser() {
+		return this.user;
 	}
 
-	public void setTask(Task task) {
-		this.task = task;
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	@Inject
@@ -95,19 +95,19 @@ public class TaskBean implements Serializable {
 		}
 
 		if (this.id == null) {
-			this.task = this.example;
+			this.user = this.example;
 		} else {
-			this.task = findById(getId());
+			this.user = findById(getId());
 		}
 	}
 
-	public Task findById(Long id) {
+	public User findById(Long id) {
 
-		return this.entityManager.find(Task.class, id);
+		return this.entityManager.find(User.class, id);
 	}
 
 	/*
-	 * Support updating and deleting Task entities
+	 * Support updating and deleting User entities
 	 */
 
 	public String update() {
@@ -115,11 +115,11 @@ public class TaskBean implements Serializable {
 
 		try {
 			if (this.id == null) {
-				this.entityManager.persist(this.task);
+				this.entityManager.persist(this.user);
 				return "search?faces-redirect=true";
 			} else {
-				this.entityManager.merge(this.task);
-				return "view?faces-redirect=true&id=" + this.task.getId();
+				this.entityManager.merge(this.user);
+				return "view?faces-redirect=true&id=" + this.user.getId();
 			}
 		} catch (Exception e) {
 			FacesContext.getCurrentInstance().addMessage(null,
@@ -132,18 +132,23 @@ public class TaskBean implements Serializable {
 		this.conversation.end();
 
 		try {
-			Task deletableEntity = findById(getId());
-			Iterator<Goal> iterGoals = deletableEntity.getGoals().iterator();
-			for (; iterGoals.hasNext();) {
-				Goal nextInGoals = iterGoals.next();
-				nextInGoals.getTasks().remove(deletableEntity);
-				iterGoals.remove();
-				this.entityManager.merge(nextInGoals);
+			User deletableEntity = findById(getId());
+			Iterator<Task> iterOwnedTasks = deletableEntity.getOwnedTasks()
+					.iterator();
+			for (; iterOwnedTasks.hasNext();) {
+				Task nextInOwnedTasks = iterOwnedTasks.next();
+				nextInOwnedTasks.setOwner(null);
+				iterOwnedTasks.remove();
+				this.entityManager.merge(nextInOwnedTasks);
 			}
-			User owner = deletableEntity.getOwner();
-			owner.getOwnedTasks().remove(deletableEntity);
-			deletableEntity.setOwner(null);
-			this.entityManager.merge(owner);
+			Iterator<Goal> iterOwnedGoals = deletableEntity.getOwnedGoals()
+					.iterator();
+			for (; iterOwnedGoals.hasNext();) {
+				Goal nextInOwnedGoals = iterOwnedGoals.next();
+				nextInOwnedGoals.setOwner(null);
+				iterOwnedGoals.remove();
+				this.entityManager.merge(nextInOwnedGoals);
+			}
 			this.entityManager.remove(deletableEntity);
 			this.entityManager.flush();
 			return "search?faces-redirect=true";
@@ -155,14 +160,14 @@ public class TaskBean implements Serializable {
 	}
 
 	/*
-	 * Support searching Task entities with pagination
+	 * Support searching User entities with pagination
 	 */
 
 	private int page;
 	private long count;
-	private List<Task> pageItems;
+	private List<User> pageItems;
 
-	private Task example = new Task();
+	private User example = new User();
 
 	public int getPage() {
 		return this.page;
@@ -176,11 +181,11 @@ public class TaskBean implements Serializable {
 		return 10;
 	}
 
-	public Task getExample() {
+	public User getExample() {
 		return this.example;
 	}
 
-	public void setExample(Task example) {
+	public void setExample(User example) {
 		this.example = example;
 	}
 
@@ -196,7 +201,7 @@ public class TaskBean implements Serializable {
 		// Populate this.count
 
 		CriteriaQuery<Long> countCriteria = builder.createQuery(Long.class);
-		Root<Task> root = countCriteria.from(Task.class);
+		Root<User> root = countCriteria.from(User.class);
 		countCriteria = countCriteria.select(builder.count(root)).where(
 				getSearchPredicates(root));
 		this.count = this.entityManager.createQuery(countCriteria)
@@ -204,16 +209,16 @@ public class TaskBean implements Serializable {
 
 		// Populate this.pageItems
 
-		CriteriaQuery<Task> criteria = builder.createQuery(Task.class);
-		root = criteria.from(Task.class);
-		TypedQuery<Task> query = this.entityManager.createQuery(criteria
+		CriteriaQuery<User> criteria = builder.createQuery(User.class);
+		root = criteria.from(User.class);
+		TypedQuery<User> query = this.entityManager.createQuery(criteria
 				.select(root).where(getSearchPredicates(root)));
 		query.setFirstResult(this.page * getPageSize()).setMaxResults(
 				getPageSize());
 		this.pageItems = query.getResultList();
 	}
 
-	private Predicate[] getSearchPredicates(Root<Task> root) {
+	private Predicate[] getSearchPredicates(Root<User> root) {
 
 		CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
 		List<Predicate> predicatesList = new ArrayList<Predicate>();
@@ -224,25 +229,23 @@ public class TaskBean implements Serializable {
 					builder.lower(root.<String> get("name")),
 					'%' + name.toLowerCase() + '%'));
 		}
-		Long priority = this.example.getPriority();
-		if (priority != null && priority.intValue() != 0) {
-			predicatesList.add(builder.equal(root.get("priority"), priority));
-		}
-		String observaciones = this.example.getObservaciones();
-		if (observaciones != null && !"".equals(observaciones)) {
+		String email = this.example.getEmail();
+		if (email != null && !"".equals(email)) {
 			predicatesList.add(builder.like(
-					builder.lower(root.<String> get("observaciones")),
-					'%' + observaciones.toLowerCase() + '%'));
+					builder.lower(root.<String> get("email")),
+					'%' + email.toLowerCase() + '%'));
 		}
-		User owner = this.example.getOwner();
-		if (owner != null) {
-			predicatesList.add(builder.equal(root.get("owner"), owner));
+		String password = this.example.getPassword();
+		if (password != null && !"".equals(password)) {
+			predicatesList.add(builder.like(
+					builder.lower(root.<String> get("password")),
+					'%' + password.toLowerCase() + '%'));
 		}
 
 		return predicatesList.toArray(new Predicate[predicatesList.size()]);
 	}
 
-	public List<Task> getPageItems() {
+	public List<User> getPageItems() {
 		return this.pageItems;
 	}
 
@@ -251,16 +254,16 @@ public class TaskBean implements Serializable {
 	}
 
 	/*
-	 * Support listing and POSTing back Task entities (e.g. from inside an
+	 * Support listing and POSTing back User entities (e.g. from inside an
 	 * HtmlSelectOneMenu)
 	 */
 
-	public List<Task> getAll() {
+	public List<User> getAll() {
 
-		CriteriaQuery<Task> criteria = this.entityManager.getCriteriaBuilder()
-				.createQuery(Task.class);
+		CriteriaQuery<User> criteria = this.entityManager.getCriteriaBuilder()
+				.createQuery(User.class);
 		return this.entityManager.createQuery(
-				criteria.select(criteria.from(Task.class))).getResultList();
+				criteria.select(criteria.from(User.class))).getResultList();
 	}
 
 	@Resource
@@ -268,8 +271,8 @@ public class TaskBean implements Serializable {
 
 	public Converter getConverter() {
 
-		final TaskBean ejbProxy = this.sessionContext
-				.getBusinessObject(TaskBean.class);
+		final UserBean ejbProxy = this.sessionContext
+				.getBusinessObject(UserBean.class);
 
 		return new Converter() {
 
@@ -288,7 +291,7 @@ public class TaskBean implements Serializable {
 					return "";
 				}
 
-				return String.valueOf(((Task) value).getId());
+				return String.valueOf(((User) value).getId());
 			}
 		};
 	}
@@ -297,15 +300,15 @@ public class TaskBean implements Serializable {
 	 * Support adding children to bidirectional, one-to-many tables
 	 */
 
-	private Task add = new Task();
+	private User add = new User();
 
-	public Task getAdd() {
+	public User getAdd() {
 		return this.add;
 	}
 
-	public Task getAdded() {
-		Task added = this.add;
-		this.add = new Task();
+	public User getAdded() {
+		User added = this.add;
+		this.add = new User();
 		return added;
 	}
 }

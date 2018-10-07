@@ -19,7 +19,7 @@ public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
 	@Version
@@ -37,6 +37,9 @@ public class User implements Serializable {
 
 	@OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
 	private Set<Goal> ownedGoals = new HashSet<Goal>();
+
+	@Column(nullable = false)
+	private String password;
 
 	public Long getId() {
 		return this.id;
@@ -95,16 +98,6 @@ public class User implements Serializable {
 		this.email = email;
 	}
 
-	@Override
-	public String toString() {
-		String result = getClass().getSimpleName() + " ";
-		if (name != null && !name.trim().isEmpty())
-			result += "name: " + name;
-		if (email != null && !email.trim().isEmpty())
-			result += ", email: " + email;
-		return result;
-	}
-
 	public Set<Task> getOwnedTasks() {
 		return this.ownedTasks;
 	}
@@ -119,6 +112,26 @@ public class User implements Serializable {
 
 	public void setOwnedGoals(final Set<Goal> ownedGoals) {
 		this.ownedGoals = ownedGoals;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	@Override
+	public String toString() {
+		String result = getClass().getSimpleName() + " ";
+		if (name != null && !name.trim().isEmpty())
+			result += "name: " + name;
+		if (email != null && !email.trim().isEmpty())
+			result += ", email: " + email;
+		if (password != null && !password.trim().isEmpty())
+			result += ", password: " + password;
+		return result;
 	}
 
 }
