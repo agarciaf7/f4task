@@ -13,6 +13,8 @@ import org.agf.model.Task;
 import javax.persistence.OneToMany;
 import javax.persistence.CascadeType;
 import org.agf.model.Goal;
+import javax.persistence.ManyToOne;
+import javax.persistence.FetchType;
 
 @Entity
 public class User implements Serializable {
